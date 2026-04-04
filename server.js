@@ -1328,7 +1328,7 @@ io.on('connection', (socket) => {
         if (queue.find(q => q.socket.id === socket.id)) return;
 
         console.log(`[Q] ${socket.username} searching for match (${mode})`);
-        queue.push({ socket, username: socket.username, mode });
+        queue.push({ socket, username: socket.username, mode, joinedAt: Date.now() });
         broadcastQueue();
         tryMatch();
     });
@@ -1338,6 +1338,16 @@ io.on('connection', (socket) => {
         console.log(`[Q] ${socket.username} left queue`);
         socket.emit('matchCancelled');
         broadcastQueue();
+    });
+
+    socket.on('getQueuePlayers', () => {
+        const now = Date.now();
+        const players = queue.map(q => ({
+            username: q.username,
+            mode: q.mode,
+            time: Math.floor((now - q.joinedAt) / 1000)
+        }));
+        socket.emit('queuePlayers', players);
     });
 
     // ===================== GAME =====================
@@ -1452,7 +1462,12 @@ io.on('connection', (socket) => {
 
 // ===================== MATCHMAKING =====================
 function broadcastQueue() {
-    const queueInfo = queue.map(q => ({ username: q.username, mode: q.mode }));
+    const now = Date.now();
+    const queueInfo = queue.map(q => ({
+        username: q.username,
+        mode: q.mode,
+        time: Math.floor((now - q.joinedAt) / 1000)
+    }));
     io.emit('queueUpdate', { queue: queueInfo, count: queue.length });
 }
 

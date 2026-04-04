@@ -36,6 +36,20 @@
         .mode-btn.active{border-color:#00f3ff;color:#00f3ff;box-shadow:0 0 10px rgba(0,243,255,.2)}
         .player-sel{display:flex;gap:10px;margin-bottom:24px}
         .player-btn.active{border-color:#ffaa00;color:#ffaa00;box-shadow:0 0 10px rgba(255,170,0,.2)}
+        .diff-sel{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+        .diff-btn{padding:6px 14px;border:1px solid rgba(255,255,255,.1);border-radius:6px;background:0 0;color:#666;font-size:10px;letter-spacing:1px;cursor:pointer;transition:.3s}
+        .diff-btn.active{border-color:#ff3366;color:#ff3366;box-shadow:0 0 10px rgba(255,51,102,.2)}
+        .diff-btn[data-diff="easy"].active{border-color:#00ff88;color:#00ff88;box-shadow:0 0 10px rgba(0,255,136,.2)}
+        .diff-btn[data-diff="medium"].active{border-color:#ffaa00;color:#ffaa00;box-shadow:0 0 10px rgba(255,170,0,.2)}
+        .diff-btn[data-diff="hard"].active{border-color:#ff5500;color:#ff5500;box-shadow:0 0 10px rgba(255,85,0,.2)}
+        .diff-btn[data-diff="extreme"].active{border-color:#ff3366;color:#ff3366;box-shadow:0 0 10px rgba(255,51,102,.2)}
+        #queuePlayersList::-webkit-scrollbar{width:6px}
+        #queuePlayersList::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:3px}
+        #queuePlayersList::-webkit-scrollbar-thumb{background:rgba(0,243,255,.3);border-radius:3px}
+        .queue-player{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+        .queue-player:last-child{border-bottom:none}
+        .queue-player-name{font-size:12px;color:#fff}
+        .queue-player-time{font-size:10px;color:#888}
         #gameCanvas{z-index:2;display:none}
         #hud{position:absolute;top:0;left:0;width:100%;padding:16px 30px;z-index:5;display:none;pointer-events:none}
         .hud-row{display:flex;justify-content:space-between;align-items:center}
@@ -408,25 +422,36 @@
         .pp-close:hover{color:#ff3366}
         .pp-muted-tag{font-size:10px;color:#ff3366;letter-spacing:1px}
 
-        /* MOBILE TOUCH CONTROLS */
-        #mobileControls{display:none;position:fixed;bottom:0;left:0;width:100%;height:40%;z-index:50;pointer-events:none}
-        .touch-active #mobileControls{display:block}
+        /* MOBILE TOUCH CONTROLS - Only show during gameplay */
+        #mobileControls{display:none;position:fixed;bottom:0;left:0;width:100%;height:35%;z-index:50;pointer-events:none}
+        #mobileControls.visible{display:block}
         #mobileControls *{pointer-events:auto}
 
-        /* Virtual Joystick (Left side - Movement) */
-        #joystickArea{position:absolute;left:20px;bottom:80px;width:140px;height:140px}
-        #joystickBase{width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08);border:3px solid rgba(0,243,255,.3);position:relative}
-        #joystickThumb{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#00f3ff,#0088ff);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,243,255,.5);transition:transform .05s}
+        /* Virtual Joystick (Left side - Movement) - Smaller for mobile */
+        #joystickArea{position:absolute;left:10px;bottom:20px;width:100px;height:100px}
+        #joystickBase{width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(0,243,255,.3);position:relative}
+        #joystickThumb{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00f3ff,#0088ff);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 15px rgba(0,243,255,.5);transition:transform .05s}
 
-        /* Action Buttons (Right side) */
-        #actionButtons{position:absolute;right:20px;bottom:60px;display:flex;flex-direction:column;gap:12px}
-        .action-row{display:flex;gap:12px;justify-content:flex-end}
-        .touch-btn{width:70px;height:70px;border-radius:50%;border:3px solid;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:1px;color:#fff;cursor:pointer;transition:all .1s;user-select:none;-webkit-user-select:none}
-        .touch-btn:active{transform:scale(.9);background:rgba(255,255,255,.2)}
-        .touch-btn.btn-jump{border-color:#00f3ff;box-shadow:0 0 15px rgba(0,243,255,.3)}
-        .touch-btn.btn-attack{border-color:#ff3366;box-shadow:0 0 15px rgba(255,51,102,.3)}
-        .touch-btn.btn-dash{border-color:#ffaa00;box-shadow:0 0 15px rgba(255,170,0,.3)}
-        .touch-btn.btn-shatter{border-color:#a855f7;box-shadow:0 0 15px rgba(168,85,247,.3)}
+        /* Action Buttons (Right side) - Compact layout */
+        #actionButtons{position:absolute;right:10px;bottom:15px;display:flex;flex-direction:row;gap:8px;align-items:flex-end}
+        .action-row{display:flex;gap:8px;justify-content:flex-end;flex-direction:column}
+        .touch-btn{width:55px;height:55px;border-radius:50%;border:2px solid;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;letter-spacing:0.5px;color:#fff;cursor:pointer;transition:all .1s;user-select:none;-webkit-user-select:none}
+        .touch-btn:active,.touch-btn.pressed{transform:scale(.85);background:rgba(255,255,255,.25)}
+        .touch-btn.btn-jump{border-color:#00f3ff;box-shadow:0 0 10px rgba(0,243,255,.3)}
+        .touch-btn.btn-attack{border-color:#ff3366;box-shadow:0 0 10px rgba(255,51,102,.3)}
+        .touch-btn.btn-dash{border-color:#ffaa00;box-shadow:0 0 10px rgba(255,170,0,.3)}
+        .touch-btn.btn-shatter{border-color:#a855f7;box-shadow:0 0 10px rgba(168,85,247,.3)}
+
+        /* Landscape orientation overlay for mobile */
+        #rotateOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#0a0a0a,#1a1a2e);z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+        #rotateOverlay svg{width:80px;height:80px;margin-bottom:20px;animation:rotate-phone 1.5s ease-in-out infinite}
+        #rotateOverlay h2{color:#fff;font-size:18px;margin-bottom:10px;letter-spacing:2px}
+        #rotateOverlay p{color:#888;font-size:12px}
+        @keyframes rotate-phone{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+        @media screen and (max-width:768px) and (orientation:portrait){
+            body.show-rotate #rotateOverlay{display:flex}
+            body.show-rotate #gameCanvas,body.show-rotate #hud,body.show-rotate #mobileControls{display:none!important}
+        }
 
         /* Mobile HUD adjustments */
         @media(max-width:768px){
@@ -457,6 +482,16 @@
     </style>
 </head>
 <body>
+    <!-- ROTATE SCREEN OVERLAY FOR MOBILE -->
+    <div id="rotateOverlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00f3ff" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2"/>
+            <line x1="12" y1="18" x2="12" y2="18.01"/>
+        </svg>
+        <h2>ROTATE YOUR DEVICE</h2>
+        <p>Play in landscape mode for the best experience</p>
+    </div>
+
     <!-- PERSISTENT USER BAR -->
     <div id="userBar">
         <div class="ub-left">
@@ -646,6 +681,23 @@
                 <button class="mode-btn active" data-mode="bestof3">BEST OF 3</button>
                 <button class="mode-btn" data-mode="bestof5">BEST OF 5</button>
                 <button class="mode-btn" data-mode="endless">ENDLESS</button>
+            </div>
+            <!-- AI Difficulty Selector -->
+            <div id="aiDifficultySel" style="display:none;margin-bottom:15px">
+                <div style="font-size:11px;color:#888;letter-spacing:2px;margin-bottom:8px">AI DIFFICULTY</div>
+                <div class="diff-sel">
+                    <button class="diff-btn" data-diff="easy">EASY</button>
+                    <button class="diff-btn active" data-diff="medium">MEDIUM</button>
+                    <button class="diff-btn" data-diff="hard">HARD</button>
+                    <button class="diff-btn" data-diff="extreme">EXTREME</button>
+                </div>
+            </div>
+            <!-- Online Queue Display -->
+            <div id="onlineQueueDisplay" style="display:none;margin-bottom:15px;width:100%;max-width:400px">
+                <div style="font-size:11px;color:#888;letter-spacing:2px;margin-bottom:8px">PLAYERS IN QUEUE</div>
+                <div id="queuePlayersList" style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;max-height:120px;overflow-y:auto">
+                    <div style="color:#666;font-size:12px;text-align:center;padding:10px">Loading...</div>
+                </div>
             </div>
             <div class="ctrl-wrap" id="ctrlWrap">
                 <div class="ctrl-box">
@@ -1588,6 +1640,8 @@ if(logoutBtn) logoutBtn.addEventListener('click', doLogout);
 })();
 
 // ===================== MODE SELECT =====================
+let aiDifficulty = 'medium';
+
 document.querySelectorAll('.player-btn').forEach(b=>{
     b.addEventListener('click',()=>{
         document.querySelectorAll('.player-btn').forEach(x=>x.classList.remove('active'));
@@ -1595,7 +1649,13 @@ document.querySelectorAll('.player-btn').forEach(b=>{
         numPlayers = b.dataset.players;
         const p2box = document.getElementById('p2Box');
         const startBtn = document.getElementById('startBtn');
+        const aiDiffSel = document.getElementById('aiDifficultySel');
+        const onlineQueueDisp = document.getElementById('onlineQueueDisplay');
         if(!p2box || !startBtn) return;
+
+        // Hide both special displays first
+        if(aiDiffSel) aiDiffSel.style.display = 'none';
+        if(onlineQueueDisp) onlineQueueDisp.style.display = 'none';
 
         const h2 = p2box.querySelector('h2');
         if(!h2) return;
@@ -1604,15 +1664,27 @@ document.querySelectorAll('.player-btn').forEach(b=>{
             h2.className='aic'; h2.textContent='AI BOT';
             p2box.querySelectorAll('.cr').forEach(r=>r.style.display='none');
             startBtn.textContent='FIGHT';
+            if(aiDiffSel) aiDiffSel.style.display = 'block';
         } else if(numPlayers==='online'){
             h2.className='onlinec'; h2.textContent='ONLINE';
             p2box.querySelectorAll('.cr').forEach(r=>r.style.display='none');
             startBtn.textContent='FIND MATCH';
+            if(onlineQueueDisp) onlineQueueDisp.style.display = 'block';
+            requestQueuePlayers();
         } else {
             h2.className='p2c'; h2.textContent='PLAYER 2';
             p2box.querySelectorAll('.cr').forEach(r=>r.style.display='flex');
             startBtn.textContent='FIGHT';
         }
+    });
+});
+
+// AI Difficulty selection
+document.querySelectorAll('.diff-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+        document.querySelectorAll('.diff-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        aiDifficulty = b.dataset.diff;
     });
 });
 
@@ -1673,6 +1745,7 @@ function showMenu(){
     initMenu(); drawMenu();
     updateProfile();
     state='menu';
+    if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
     if(isOnline){
         OnlineManager.leaveMatch();
         OnlineManager.disconnect();
@@ -1723,6 +1796,41 @@ function startGame(){
 }
 
 // ===================== ONLINE MATCHMAKING =====================
+let queueUpdateInterval = null;
+
+function requestQueuePlayers() {
+    if (!OnlineManager.isConnected()) {
+        document.getElementById('queuePlayersList').innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:10px">Connect to server to see queue</div>';
+        return;
+    }
+    socket.emit('getQueuePlayers');
+}
+
+function updateQueueDisplay(players) {
+    const list = document.getElementById('queuePlayersList');
+    if (!list) return;
+
+    if (!players || players.length === 0) {
+        list.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:10px">No players in queue</div>';
+        return;
+    }
+
+    list.innerHTML = players.map(p => {
+        const time = formatQueueTime(p.time);
+        return `<div class="queue-player">
+            <span class="queue-player-name">${escapeHtml(p.username)}</span>
+            <span class="queue-player-time">${time}</span>
+        </div>`;
+    }).join('');
+}
+
+function formatQueueTime(seconds) {
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
 function startOnlineMatchmaking(){
     if(!currentUser){
         alert('Please log in to play online');
@@ -2625,6 +2733,7 @@ document.getElementById('reviveYesBtn').addEventListener('click', async ()=>{
         p.x = p.spawnX; p.y = p.spawnY; p.rx = p.spawnX; p.ry = p.spawnY;
         p.vx = 0; p.vy = 0; p.inv = 120; p.stun = 0; p.combo = 0;
         state = 'playing';
+        if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
         gameLoop();
     }catch(e){ alert('Error'); }
 });
@@ -3065,6 +3174,7 @@ function showOnlineWin(){
         saveCurrentUser();
     }
     state='result';
+    if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
 }
 
 // ===================== ONLINE INPUT HELPERS =====================
@@ -3490,11 +3600,13 @@ function togglePause(){
         isPaused = true;
         prePauseState = state;
         state = 'paused';
+        if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
         pauseMenu.style.display = 'flex';
         cancelAnimationFrame(animFrame);
     } else {
         isPaused = false;
         state = prePauseState || 'playing';
+        if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
         pauseMenu.style.display = 'none';
         if(state === 'playing'){
             lastTime = performance.now();
@@ -3777,6 +3889,7 @@ function playerDie(p){
         let localPlayer = players[localIdx];
         if(p.id === localIdx && currentUser && !isOnline && (currentUser.emeralds || 0) >= reviveCost){
             state = 'paused';
+            if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
             reviveAvailable = true;
             cancelAnimationFrame(animFrame);
             const overlay = document.getElementById('reviveOverlay');
@@ -4086,30 +4199,47 @@ function roundRect(ctx,x,y,w,h,r){
 function lerp(a,b,t){ return a+(b-a)*t; }
 
 // ===================== AI BOT =====================
+const AI_DIFFICULTY = {
+    easy: { reaction: 18, aggression: 0.15, comboChance: 0.05, shatterChance: 0.03, dashChance: 0.03, prediction: 0 },
+    medium: { reaction: 10, aggression: 0.35, comboChance: 0.15, shatterChance: 0.08, dashChance: 0.08, prediction: 0.15 },
+    hard: { reaction: 5, aggression: 0.55, comboChance: 0.3, shatterChance: 0.15, dashChance: 0.15, prediction: 0.4 },
+    extreme: { reaction: 2, aggression: 0.8, comboChance: 0.6, shatterChance: 0.3, dashChance: 0.3, prediction: 0.8 }
+};
+
 class AIController {
-    constructor(idx){
+    constructor(idx, difficulty = 'medium'){
         this.idx=idx;
-        this.aggression=0.6+Math.random()*0.3;
-        this.reactionDelay=4+Math.floor(Math.random()*8);
+        this.difficulty=AI_DIFFICULTY[difficulty]||AI_DIFFICULTY.medium;
         this.reactionTimer=0;
+        this.comboCount=0;
     }
     update(){
         const me=players[this.idx], them=players[1-this.idx];
         if(!me||!them) return;
         this.reactionTimer++;
-        if(this.reactionTimer<this.reactionDelay) return;
+        if(this.reactionTimer<this.difficulty.reaction) return;
         this.reactionTimer=0;
+
         let dx=them.x-me.x, dy=them.y-me.y;
         let dist=Math.sqrt(dx*dx+dy*dy);
         let toRight=dx>0;
         let moveDir=0, jumpH=false, attackH=false, dashH=false, shatterH=false;
 
+        // Predict player movement
+        let targetX=them.x, targetY=them.y;
+        if(this.difficulty.prediction>0 && Math.random()<this.difficulty.prediction){
+            targetX=them.x+them.vx*8;
+            targetY=them.y+them.vy*4;
+            dx=targetX-me.x;
+            toRight=dx>0;
+        }
+
         // Check ground ahead
-        let lookX=me.x+(toRight?40:-40);
+        let lookX=me.x+(toRight?50:-50);
         let hasFloor=false;
         for(let t of tiles){
             if(t.dead) continue;
-            if(lookX+me.w>t.x && lookX<t.x+t.w && me.y+me.h+10>t.y && me.y+me.h<t.y+t.h+20){hasFloor=true;break;}
+            if(lookX+me.w>t.x && lookX<t.x+t.w && me.y+me.h+10>t.y && me.y+me.h<t.y+t.h+30){hasFloor=true;break;}
         }
         let onSolid=false;
         for(let t of tiles){
@@ -4117,6 +4247,7 @@ class AIController {
             if(me.x+me.w>t.x+2 && me.x<t.x+t.w-2 && Math.abs(me.y+me.h-t.y)<6){onSolid=true;break;}
         }
 
+        // Falling recovery
         if(!onSolid && me.vy>2){
             jumpH=true;
             let nearest=null, nd=Infinity;
@@ -4130,29 +4261,52 @@ class AIController {
             return;
         }
 
-        if(me.hp<30 && dist<100){
+        // Low HP defensive
+        if(me.hp<35 && dist<120){
             moveDir=toRight?-1:1;
-            if(me.dashCD<=0 && dist<60) dashH=true;
-            if(me.jumps>0 && Math.random()<.3) jumpH=true;
-        } else if(dist<80){
-            if(me.atkCD<=0 && !me.attacking && Math.random()<this.aggression) attackH=true;
-            if(me.shatterCD<=0 && Math.random()<.15) shatterH=true;
-            if(me.dashCD<=0 && Math.random()<.12){dashH=true;moveDir=toRight?1:-1;}
-            if(Math.random()<.15 && me.jumps>0) jumpH=true;
+            if(me.dashCD<=0 && dist<70 && Math.random()<this.difficulty.dashChance) dashH=true;
+            if(me.jumps>0 && Math.random()<0.4) jumpH=true;
+        }
+        // Combat range
+        else if(dist<90){
+            if(me.atkCD<=0 && !me.attacking && Math.random()<this.difficulty.aggression){
+                attackH=true;
+                this.comboCount++;
+            }
+            // Combo
+            if(this.comboCount>0 && Math.random()<this.difficulty.comboChance){
+                if(me.atkCD<=3) attackH=true;
+                if(me.jumps>0 && Math.random()<0.25) jumpH=true;
+            }
+            // Shatter
+            if(me.shatterCD<=0 && dist<SRNG+20 && Math.random()<this.difficulty.shatterChance) shatterH=true;
+            // Dash
+            if(me.dashCD<=0 && Math.random()<this.difficulty.dashChance) dashH=true;
+            // Jump over
+            if(dy<-30 && me.jumps>0 && Math.random()<0.3) jumpH=true;
             if(!dashH) moveDir=toRight?1:-1;
-        } else if(dist<250){
+        }
+        // Approach
+        else if(dist<280){
             moveDir=toRight?1:-1;
-            if(me.dashCD<=0 && dist>120 && Math.random()<.1) dashH=true;
-            if(dy<-40 && me.jumps>0 && Math.random()<.25) jumpH=true;
-            if(me.shatterCD<=0 && dist<SRNG && Math.random()<.08) shatterH=true;
-        } else {
+            if(me.dashCD<=0 && dist>100 && Math.random()<this.difficulty.dashChance*0.5) dashH=true;
+            if(dy<-50 && me.jumps>0 && Math.random()<0.2) jumpH=true;
+            if(me.shatterCD<=0 && dist<SRNG+40 && Math.random()<this.difficulty.shatterChance*0.5) shatterH=true;
+        }
+        // Far
+        else {
             moveDir=toRight?1:-1;
-            if(me.dashCD<=0 && Math.random()<.08) dashH=true;
-            if(me.jumps>0 && Math.random()<.15) jumpH=true;
+            if(me.dashCD<=0 && Math.random()<0.06) dashH=true;
+            if(me.jumps>0 && Math.random()<0.12) jumpH=true;
         }
 
+        // Edge safety
         if(!hasFloor && onSolid && dist<150){moveDir=toRight?-1:1;dashH=false;}
-        if(me.jumps>0 && Math.random()<.03) jumpH=true;
+        // Random jumps
+        if(me.jumps>0 && Math.random()<0.03) jumpH=true;
+
+        // Reset combo
+        if(!attackH) this.comboCount=Math.max(0,this.comboCount-1);
 
         this.simInput(moveDir,jumpH,attackH,dashH,shatterH);
     }
@@ -4283,11 +4437,12 @@ function initRound(){
     console.log('[Game] Player cosmetics:', JSON.stringify(p1Cosmetics));
     players=[makePlayer(p1x,py,0,p1Cosmetics),makePlayer(p2x,py,1)];
     players.forEach(attachMethods);
-    aiBot = numPlayers==='1' ? new AIController(1) : null;
+    aiBot = numPlayers==='1' ? new AIController(1, aiDifficulty) : null;
     if(isOnline){ localFrame = 0; opponentInputBuffer = {}; }
     updateHUD(); updateXPHud();
     showAnnounce(`ROUND ${round}`, 80, ()=>{
         state='playing';
+        if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
         lastTime=performance.now();
         gameLoop();
     });
@@ -4378,6 +4533,7 @@ function showResult(winner){
 
     res.style.display='flex';
     state='result';
+    if(typeof updateMobileControlsVisibility === 'function') updateMobileControlsVisibility();
     saveCurrentUser();
     updateProfile();
 }
@@ -4539,13 +4695,33 @@ const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 
 let touchJoystickActive = false;
 let touchJoystickStart = { x: 0, y: 0 };
 let touchJoystickId = null;
-const JOYSTICK_DEADZONE = 15;
-const JOYSTICK_MAXDIST = 50;
+const JOYSTICK_DEADZONE = 12;
+const JOYSTICK_MAXDIST = 35;
+
+function updateMobileControlsVisibility() {
+    if (!isTouchDevice) return;
+
+    const mobileControls = document.getElementById('mobileControls');
+    const isPlaying = (state === 'playing' || state === 'announce');
+    const isPortrait = window.innerHeight > window.innerWidth;
+
+    // Show controls only during gameplay
+    if (isPlaying) {
+        mobileControls.classList.add('visible');
+        // Show rotate overlay in portrait mode during gameplay
+        if (isPortrait) {
+            document.body.classList.add('show-rotate');
+        } else {
+            document.body.classList.remove('show-rotate');
+        }
+    } else {
+        mobileControls.classList.remove('visible');
+        document.body.classList.remove('show-rotate');
+    }
+}
 
 function initMobileControls() {
     if (!isTouchDevice) return;
-
-    document.body.classList.add('touch-active');
 
     const joystickArea = document.getElementById('joystickArea');
     const joystickThumb = document.getElementById('joystickThumb');
@@ -4650,6 +4826,10 @@ function initMobileControls() {
             btn.classList.remove('pressed');
         });
     });
+
+    // Update visibility on orientation change
+    window.addEventListener('resize', updateMobileControlsVisibility);
+    window.addEventListener('orientationchange', updateMobileControlsVisibility);
 }
 
 // Initialize mobile controls on page load

@@ -234,6 +234,10 @@ const OnlineManager = (function() {
                 if (onQueueUpdateCb) onQueueUpdateCb(data);
             });
 
+            socket.on('queuePlayers', (players) => {
+                if (typeof window.updateQueueDisplay === 'function') window.updateQueueDisplay(players);
+            });
+
             // Damage synchronization
             socket.on('takeDamage', (data) => {
                 console.log('[Online] Damage taken:', data);
