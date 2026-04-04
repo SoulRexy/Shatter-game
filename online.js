@@ -349,6 +349,30 @@ const OnlineManager = (function() {
     function isInQueue() { return inQueue; }
     function isInMatch() { return inMatch; }
 
+    function getQueuePlayers(callback) {
+        if (!socket || !socket.connected) {
+            callback(null);
+            return;
+        }
+        socket.emit('getQueuePlayers');
+        // Store callback for response
+        if (callback) {
+            socket.once('queuePlayers', callback);
+        }
+    }
+
+    function findRankedMatch(mode) {
+        if (!socket || !socket.connected) return;
+        inQueue = true;
+        socket.emit('findMatch', { mode: mode, ranked: true });
+    }
+
+    function findCasualMatch(mode) {
+        if (!socket || !socket.connected) return;
+        inQueue = true;
+        socket.emit('findMatch', { mode: mode, ranked: false });
+    }
+
     return {
         connect, authenticate, findMatch, cancelMatch, sendInput, sendDamage,
         leaveMatch, disconnect, adminSubscribe,
@@ -358,6 +382,7 @@ const OnlineManager = (function() {
         onServerRestarting, onAuthFailed, onAuthenticated, onRenamed,
         onChatMessage, onChatHistory, onChatPing, onRoleChanged, onChatMuted, onChatError, sendChat,
         onDM, onFriendRequest, onFriendAccepted, onDamageTaken,
-        isConnected, getLatency, isInQueue, isInMatch
+        isConnected, getLatency, isInQueue, isInMatch, getQueuePlayers,
+        findRankedMatch, findCasualMatch
     };
 })();

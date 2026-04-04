@@ -43,6 +43,9 @@
         .diff-btn[data-diff="medium"].active{border-color:#ffaa00;color:#ffaa00;box-shadow:0 0 10px rgba(255,170,0,.2)}
         .diff-btn[data-diff="hard"].active{border-color:#ff5500;color:#ff5500;box-shadow:0 0 10px rgba(255,85,0,.2)}
         .diff-btn[data-diff="extreme"].active{border-color:#ff3366;color:#ff3366;box-shadow:0 0 10px rgba(255,51,102,.2)}
+        .online-mode-btn{padding:10px 24px;border:2px solid rgba(255,255,255,.1);border-radius:8px;background:0 0;color:#666;font-size:12px;letter-spacing:2px;cursor:pointer;transition:.3s;font-weight:700}
+        .online-mode-btn.active{border-color:#00f3ff;color:#00f3ff;box-shadow:0 0 15px rgba(0,243,255,.3)}
+        .online-mode-btn[data-omode="ranked"].active{border-color:#a855f7;color:#a855f7;box-shadow:0 0 15px rgba(168,85,247,.3)}
         #queuePlayersList::-webkit-scrollbar{width:6px}
         #queuePlayersList::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:3px}
         #queuePlayersList::-webkit-scrollbar-thumb{background:rgba(0,243,255,.3);border-radius:3px}
@@ -692,16 +695,25 @@
                     <button class="diff-btn" data-diff="extreme">EXTREME</button>
                 </div>
             </div>
-            <!-- Online Queue Display -->
+            <!-- Online Mode & Queue Display -->
             <div id="onlineQueueDisplay" style="display:none;margin-bottom:15px;width:100%;max-width:400px">
+                <div style="font-size:11px;color:#888;letter-spacing:2px;margin-bottom:8px">ONLINE MODE</div>
+                <div class="online-mode-sel" style="display:flex;gap:10px;justify-content:center;margin-bottom:15px">
+                    <button class="online-mode-btn active" data-omode="casual">CASUAL</button>
+                    <button class="online-mode-btn" data-omode="ranked">RANKED</button>
+                </div>
                 <div style="font-size:11px;color:#888;letter-spacing:2px;margin-bottom:8px">PLAYERS IN QUEUE</div>
                 <div id="queuePlayersList" style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;max-height:120px;overflow-y:auto">
-                    <div style="color:#666;font-size:12px;text-align:center;padding:10px">Loading...</div>
+                    <div style="color:#666;font-size:12px;text-align:center;padding:10px">No players in queue</div>
                 </div>
             </div>
             <div class="ctrl-wrap" id="ctrlWrap">
-                <div class="ctrl-box">
+                <div class="ctrl-box" id="p1Box">
                     <h2 class="p1c">PLAYER 1</h2>
+                    <div id="p1OnlineInfo" style="display:none;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.1)">
+                        <div style="font-size:10px;color:#888;letter-spacing:1px">YOUR ELO</div>
+                        <div id="p1EloDisplay" style="font-size:18px;color:#00f3ff;font-weight:700">1000</div>
+                    </div>
                     <div class="cr"><span>Move</span><span class="k">A / D</span></div>
                     <div class="cr"><span>Jump</span><span class="k">W</span></div>
                     <div class="cr"><span>Attack</span><span class="k">F</span></div>
@@ -1651,11 +1663,13 @@ document.querySelectorAll('.player-btn').forEach(b=>{
         const startBtn = document.getElementById('startBtn');
         const aiDiffSel = document.getElementById('aiDifficultySel');
         const onlineQueueDisp = document.getElementById('onlineQueueDisplay');
+        const p1OnlineInfo = document.getElementById('p1OnlineInfo');
         if(!p2box || !startBtn) return;
 
         // Hide both special displays first
         if(aiDiffSel) aiDiffSel.style.display = 'none';
         if(onlineQueueDisp) onlineQueueDisp.style.display = 'none';
+        if(p1OnlineInfo) p1OnlineInfo.style.display = 'none';
 
         const h2 = p2box.querySelector('h2');
         if(!h2) return;
@@ -1670,7 +1684,9 @@ document.querySelectorAll('.player-btn').forEach(b=>{
             p2box.querySelectorAll('.cr').forEach(r=>r.style.display='none');
             startBtn.textContent='FIND MATCH';
             if(onlineQueueDisp) onlineQueueDisp.style.display = 'block';
-            requestQueuePlayers();
+            if(p1OnlineInfo) p1OnlineInfo.style.display = 'block';
+            updateP1EloDisplay();
+            startQueuePolling();
         } else {
             h2.className='p2c'; h2.textContent='PLAYER 2';
             p2box.querySelectorAll('.cr').forEach(r=>r.style.display='flex');
@@ -1687,6 +1703,71 @@ document.querySelectorAll('.diff-btn').forEach(b=>{
         aiDifficulty = b.dataset.diff;
     });
 });
+
+// Online mode selection (Casual/Ranked)
+let onlineGameMode = 'casual';
+document.querySelectorAll('.online-mode-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+        document.querySelectorAll('.online-mode-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        onlineGameMode = b.dataset.omode;
+    });
+});
+
+function updateP1EloDisplay() {
+    const eloDisplay = document.getElementById('p1EloDisplay');
+    if (eloDisplay && currentUser && currentUser.elo !== undefined) {
+        eloDisplay.textContent = currentUser.elo;
+    } else if (eloDisplay) {
+        eloDisplay.textContent = '1000';
+    }
+}
+
+let queuePollingInterval = null;
+function startQueuePolling() {
+    stopQueuePolling();
+    fetchQueuePlayers();
+    queuePollingInterval = setInterval(fetchQueuePlayers, 3000);
+}
+
+function stopQueuePolling() {
+    if (queuePollingInterval) {
+        clearInterval(queuePollingInterval);
+        queuePollingInterval = null;
+    }
+}
+
+function fetchQueuePlayers() {
+    const list = document.getElementById('queuePlayersList');
+    if (!list) return;
+
+    if (!OnlineManager.isConnected()) {
+        list.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:10px">Connect to server first</div>';
+        return;
+    }
+
+    OnlineManager.getQueuePlayers((players) => {
+        if (!players || players.length === 0) {
+            list.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:10px">No players in queue</div>';
+            return;
+        }
+        list.innerHTML = players.map(p => {
+            const time = formatQueueTime(p.time || 0);
+            const eloText = p.elo !== undefined ? `<span style="color:#888;margin-left:8px">${p.elo}</span>` : '';
+            return `<div class="queue-player">
+                <span class="queue-player-name">${escapeHtml(p.username)}${eloText}</span>
+                <span class="queue-player-time">${time}</span>
+            </div>`;
+        }).join('');
+    });
+}
+
+function formatQueueTime(seconds) {
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
 document.querySelectorAll('.mode-btn').forEach(b=>{
     b.addEventListener('click',()=>{
