@@ -1042,14 +1042,21 @@ app.get('/api/dms/:username', (req, res) => {
 global.DM_HISTORY = {};
 app.post('/api/dms/send', (req, res) => {
     const { token, to, message } = req.body;
+    console.log('[DM] Send request:', { to, message: message?.slice(0, 20) });
+
     const user = getSessionUser(token);
-    if (!user) return res.status(401).json({ error: 'Invalid session' });
+    if (!user) {
+        console.log('[DM] Invalid session');
+        return res.status(401).json({ error: 'Invalid session' });
+    }
 
     // Check if friends (handle both string array and object array)
     const friends = user.friends || [];
     const isFriend = friends.some(f => typeof f === 'string' ? f === to : f.username === to);
+
     if (!isFriend) {
-        return res.status(403).json({ error: 'Not friends with this user' });
+        console.log('[DM] Not friends:', user.user, '->', to, 'Friends:', friends);
+        return res.status(403).json({ error: 'Not friends with this user. You need to be friends first!' });
     }
 
     const dmKey = [user.user, to].sort().join('_');
@@ -1064,12 +1071,15 @@ app.post('/api/dms/send', (req, res) => {
     global.DM_HISTORY[dmKey].push(msg);
     if (global.DM_HISTORY[dmKey].length > 100) global.DM_HISTORY[dmKey].shift();
 
+    console.log('[DM] Message saved:', dmKey);
+
     // Send via socket if recipient is online
     const targetSocketId = playerByName[to];
     if (targetSocketId) {
         const targetSocket = io.sockets.sockets.get(targetSocketId);
         if (targetSocket) {
             targetSocket.emit('dm', msg);
+            console.log('[DM] Delivered via socket to:', to);
         }
     }
 

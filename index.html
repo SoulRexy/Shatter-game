@@ -241,8 +241,8 @@
         .pending-btns button{padding:4px 10px;font-size:9px;border-radius:4px;cursor:pointer;border:none}
         .pending-btns .accept-btn{background:rgba(0,255,136,.15);color:#00ff88}
         .pending-btns .decline-btn{background:rgba(255,51,102,.15);color:#ff3366}
-        /* DM Panel */
-        #dmPanel{display:none;position:fixed;top:44px;right:320px;width:350px;height:calc(100vh - 44px);z-index:46;flex-direction:column;background:rgba(8,8,18,.99);border-left:1px solid rgba(255,255,255,.08)}
+        /* DM Panel - Left side like chat */
+        #dmPanel{display:none;position:fixed;left:0;top:44px;width:320px;height:calc(100vh - 44px);z-index:46;flex-direction:column;background:rgba(8,8,18,.99);border-right:1px solid rgba(255,255,255,.08)}
         .dm-header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
         .dm-back{background:none;border:none;color:#555;font-size:18px;cursor:pointer}
         .dm-back:hover{color:#00c8ff}
@@ -2616,7 +2616,11 @@ function renderDMMessages(){
 
 async function sendDM(){
     const input = document.getElementById('dmInput');
-    if (!input) return console.error('DM input not found');
+    if (!input) {
+        console.error('DM input not found');
+        showToast('DM input not found', 'ERROR');
+        return;
+    }
 
     const message = input.value.trim();
     if (!message) return;
@@ -2625,8 +2629,13 @@ async function sendDM(){
         console.error('currentDM is not set');
         return;
     }
+    if (!currentToken) {
+        showToast('Not logged in', 'ERROR');
+        console.error('currentToken is not set');
+        return;
+    }
 
-    console.log('Sending DM to:', currentDM, 'Message:', message);
+    console.log('Sending DM to:', currentDM, 'Message:', message, 'Token:', currentToken?.slice(0, 10) + '...');
 
     try {
         const res = await fetch('/api/dms/send', {
@@ -2635,9 +2644,9 @@ async function sendDM(){
             body: JSON.stringify({ token: currentToken, to: currentDM, message })
         });
         const data = await res.json();
-        console.log('DM response:', data);
+        console.log('DM response:', res.status, data);
 
-        if (res.ok && data.message) {
+        if (res.ok && data.success) {
             const dmKey = [currentUser.user, currentDM].sort().join('_');
             if (!dmHistory[dmKey]) dmHistory[dmKey] = [];
             dmHistory[dmKey].push(data.message);
@@ -2648,7 +2657,7 @@ async function sendDM(){
         }
     } catch (e) {
         console.error('DM send error:', e);
-        showToast('Failed to send message', 'ERROR');
+        showToast('Failed to send message - connection error', 'ERROR');
     }
 }
 
