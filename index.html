@@ -983,13 +983,6 @@ const SRNG = 90, SCD = 80;
 const MAXHP = 100, NLIVES = 3;
 
 // ===================== HELPER FUNCTIONS =====================
-function escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
 function formatQueueTime(seconds) {
     if (seconds < 60) return `${seconds}s`;
     const mins = Math.floor(seconds / 60);
@@ -1906,8 +1899,9 @@ function updateQueueDisplay(players) {
 
     list.innerHTML = players.map(p => {
         const time = formatQueueTime(p.time);
+        const safeName = (p.username || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return `<div class="queue-player">
-            <span class="queue-player-name">${escapeHtml(p.username)}</span>
+            <span class="queue-player-name">${safeName}</span>
             <span class="queue-player-time">${time}</span>
         </div>`;
     }).join('');
