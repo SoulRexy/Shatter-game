@@ -1770,7 +1770,7 @@ function fetchQueuePlayers() {
             const time = formatQueueTime(p.time || 0);
             const eloText = p.elo !== undefined ? `<span style="color:#ffaa00;margin-left:8px">⭐${p.elo}</span>` : '';
             return `<div class="queue-player">
-                <span class="queue-player-name">${escapeHtml(p.username)}${eloText}</span>
+                <span class="queue-player-name">${p.username ? p.username.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''}${eloText}</span>
                 <span class="queue-player-time">${time}</span>
             </div>`;
         }).join('');
@@ -2596,7 +2596,8 @@ function renderDMMessages(){
     container.innerHTML = messages.map(m=>{
         const time = new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
         const cls = m.from===currentUser.user?'outgoing':'incoming';
-        return `<div class="dm-msg ${cls}">${escapeHtml(m.message)}<span class="msg-time">${time}</span></div>`;
+        const safeMsg = m.message ? m.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
+        return `<div class="dm-msg ${cls}">${safeMsg}<span class="msg-time">${time}</span></div>`;
     }).join('');
 
     container.scrollTop = container.scrollHeight;
