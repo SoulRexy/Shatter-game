@@ -1045,7 +1045,10 @@ app.post('/api/dms/send', (req, res) => {
     const user = getSessionUser(token);
     if (!user) return res.status(401).json({ error: 'Invalid session' });
 
-    if (!(user.friends || []).includes(to)) {
+    // Check if friends (handle both string array and object array)
+    const friends = user.friends || [];
+    const isFriend = friends.some(f => typeof f === 'string' ? f === to : f.username === to);
+    if (!isFriend) {
         return res.status(403).json({ error: 'Not friends with this user' });
     }
 
@@ -1055,7 +1058,7 @@ app.post('/api/dms/send', (req, res) => {
     const msg = {
         from: user.user,
         to,
-        message: message.trim().slice(0, 200),
+        message: (message || '').trim().slice(0, 200),
         timestamp: Date.now()
     };
     global.DM_HISTORY[dmKey].push(msg);

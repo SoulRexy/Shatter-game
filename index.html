@@ -2616,24 +2616,40 @@ function renderDMMessages(){
 
 async function sendDM(){
     const input = document.getElementById('dmInput');
-    const message = input.value.trim();
-    if(!message || !currentDM) return;
+    if (!input) return console.error('DM input not found');
 
-    try{
-        const res = await fetch('/api/dms/send',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({token:currentToken, to:currentDM, message})
+    const message = input.value.trim();
+    if (!message) return;
+    if (!currentDM) {
+        showToast('No conversation selected', 'ERROR');
+        console.error('currentDM is not set');
+        return;
+    }
+
+    console.log('Sending DM to:', currentDM, 'Message:', message);
+
+    try {
+        const res = await fetch('/api/dms/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: currentToken, to: currentDM, message })
         });
         const data = await res.json();
-        if(res.ok && data.message){
+        console.log('DM response:', data);
+
+        if (res.ok && data.message) {
             const dmKey = [currentUser.user, currentDM].sort().join('_');
-            if(!dmHistory[dmKey]) dmHistory[dmKey]=[];
+            if (!dmHistory[dmKey]) dmHistory[dmKey] = [];
             dmHistory[dmKey].push(data.message);
             renderDMMessages();
-            input.value='';
+            input.value = '';
+        } else {
+            showToast(data.error || 'Failed to send message', 'ERROR');
         }
-    }catch(e){}
+    } catch (e) {
+        console.error('DM send error:', e);
+        showToast('Failed to send message', 'ERROR');
+    }
 }
 
 // DM panel events
@@ -2650,13 +2666,21 @@ document.getElementById('sendFriendReq')?.addEventListener('click', addFriend);
 
 // Listen for incoming DMs and friend requests via socket
 OnlineManager.onDM((msg)=>{
+    const dmKey = [currentUser.user, msg.from].sort().join('_');
+    if(!dmHistory[dmKey]) dmHistory[dmKey]=[];
+    dmHistory[dmKey].push(msg);
+
     if(currentDM===msg.from){
-        const dmKey = [currentUser.user, msg.from].sort().join('_');
-        if(!dmHistory[dmKey]) dmHistory[dmKey]=[];
-        dmHistory[dmKey].push(msg);
         renderDMMessages();
     } else {
-        showToast(`New DM from ${msg.from}`, 'MESSAGE');
+        // Show prominent notification
+        showToast(`📩 New DM from ${msg.from}: "${msg.message.slice(0, 50)}${msg.message.length > 50 ? '...' : ''}"`, 'MESSAGE');
+        // Flash the friends button
+        const friendsBtn = document.getElementById('ubFriends');
+        if (friendsBtn) {
+            friendsBtn.style.animation = 'pulse 0.5s ease-in-out 3';
+            setTimeout(() => friendsBtn.style.animation = '', 1500);
+        }
     }
 });
 
