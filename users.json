@@ -1,0 +1,188 @@
+{
+  "Owner": {
+    "user": "Owner",
+    "pass": "$2b$12$oRYbF4bwdrmpshGzPir.feG1cATD74I4UJYZTu9eSz3dBfntybFA6",
+    "xp": 661,
+    "level": 10,
+    "stats": {
+      "wins": 10,
+      "losses": 10,
+      "kills": 67,
+      "matches": 35,
+      "shatters": 67,
+      "maxCombo": 1,
+      "tilesDestroyed": 68
+    },
+    "banned": false,
+    "banReason": "",
+    "createdAt": 1775131668972,
+    "lastLogin": 1775288584247,
+    "isAdmin": true,
+    "role": "Owner",
+    "emeralds": 1e+21,
+    "ownedCosmetics": [
+      "default",
+      "skin_ice",
+      "skin_void",
+      "trail_rainbow",
+      "trail_void",
+      "aura_dark",
+      "aura_emerald",
+      "skin_ghost",
+      "trail_ice",
+      "skin_blood",
+      "trail_fire",
+      "char_celestial"
+    ],
+    "cosmetics": {
+      "skin": "skin_ghost",
+      "trail": "trail_fire",
+      "aura": "aura_emerald",
+      "character": "char_celestial"
+    }
+  },
+  "Check": {
+    "user": "Check",
+    "pass": "$2b$12$nG1yEU1uRiaUmqEzjjrKV.WQ43K0EXhsbT9QMDnbe4b/q.WUfxMVK",
+    "xp": 101,
+    "level": 1,
+    "stats": {
+      "wins": 0,
+      "losses": 2,
+      "kills": 0,
+      "matches": 3,
+      "shatters": 0,
+      "maxCombo": 1,
+      "tilesDestroyed": 3
+    },
+    "banned": false,
+    "banReason": "",
+    "createdAt": 1775131704262,
+    "lastLogin": 1775216396750,
+    "isAdmin": true,
+    "role": "Admin",
+    "emeralds": 150000
+  },
+  "fsdfsfsdfsdffsfs": {
+    "user": "fsdfsfsdfsdffsfs",
+    "pass": "$2b$12$.i7UtdALBRp035ieq99nkewM6PjiHPsQxTzy0N5wLeW3ZEU9C7LBa",
+    "xp": 0,
+    "level": 1,
+    "stats": {
+      "wins": 0,
+      "losses": 0,
+      "kills": 0,
+      "matches": 0,
+      "shatters": 0,
+      "maxCombo": 0,
+      "tilesDestroyed": 0
+    },
+    "banned": false,
+    "banReason": "",
+    "createdAt": 1775237853037,
+    "lastLogin": 1775237853037,
+    "isAdmin": false,
+    "role": "Member",
+    "emeralds": 0,
+    "cosmetics": {
+      "skin": "default",
+      "trail": "default",
+      "aura": "none"
+    },
+    "ownedCosmetics": [
+      "default"
+    ]
+  },
+  "Check1": {
+    "user": "Check1",
+    "pass": "$2b$12$RPMIR7TCLqv2cKmW/q7cl.OusUr.lOQQmcAh7DW6E9PjdMEgJvf9G",
+    "xp": 0,
+    "level": 1,
+    "stats": {
+      "wins": 0,
+      "losses": 0,
+      "kills": 0,
+      "matches": 1,
+      "shatters": 0,
+      "maxCombo": 0,
+      "tilesDestroyed": 0
+    },
+    "banned": false,
+    "banReason": "",
+    "createdAt": 1775241195788,
+    "lastLogin": 1775241195788,
+    "isAdmin": false,
+    "role": "Member",
+    "emeralds": 0,
+    "cosmetics": {
+      "skin": "default",
+      "trail": "default",
+      "aura": "none"
+    },
+    "ownedCosmetics": [
+      "default"
+    ]
+  },
+  "Uwu": {
+    "user": "Uwu",
+    "pass": "$2b$12$8VzjKxDtAZxbw4kbQgRBmud4RhQwbSsxj8yYqZkr/ap7HB1zcuB5u",
+    "xp": 0,
+    "level": 1,
+    "stats": {
+      "wins": 0,
+      "losses": 0,
+      "kills": 0,
+      "matches": 0,
+      "shatters": 0,
+      "maxCombo": 0,
+      "tilesDestroyed": 0
+    },
+    "banned": false,
+    "banReason": "",
+    "createdAt": 1775246826512,
+    "lastLogin": 1775246826512,
+    "isAdmin": false,
+    "role": "Member",
+    "emeralds": 0,
+    "cosmetics": {
+      "skin": "default",
+      "trail": "default",
+      "aura": "none"
+    },
+    "ownedCosmetics": [
+      "default"
+    ]
+  },
+  "UWU_": {
+    "user": "UWU_",
+    "pass": "$2b$12$37Gw0lyDER/5MniXYdB2p.29HH7y7sGNLNDiFDHoNDwAF.mQtEK..",
+    "xp": 639,
+    "level": 5,
+    "stats": {
+      "wins": 1,
+      "losses": 0,
+      "kills": 28,
+      "matches": 13,
+      "shatters": 0,
+      "maxCombo": 1,
+      "tilesDestroyed": 12
+    },
+    "banned": false,
+    "banReason": "",
+    "createdAt": 1775247546107,
+    "lastLogin": 1775288601991,
+    "isAdmin": false,
+    "role": "Member",
+    "emeralds": 0,
+    "cosmetics": {
+      "skin": "default",
+      "trail": "default",
+      "aura": "none"
+    },
+    "ownedCosmetics": [
+      "default"
+    ],
+    "securityQuestion": "WHat is my name",
+    "securityAnswer": "$2b$12$5eaVtWrDwehcWajBZN1VweP2ExoGsHonXEczP0H6E0pJsi6RF55Fu"
+  }
+}
