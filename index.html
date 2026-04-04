@@ -1762,19 +1762,6 @@ function fetchQueuePlayers() {
     });
 }
 
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML || str;
-    }
-
-    function formatQueueTime(seconds) {
-        if (seconds < 60) return `${seconds}s`;
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-
 function formatQueueTime(seconds) {
     if (seconds < 60) return `${seconds}s`;
     const mins = Math.floor(seconds / 60);
@@ -2596,6 +2583,13 @@ async function openDM(username){
     document.getElementById('dmStatus').className = 'dm-status '+(friend.online?'':'offline');
 
     renderDMMessages();
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 function renderDMMessages(){
