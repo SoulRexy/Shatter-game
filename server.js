@@ -952,9 +952,12 @@ app.post('/api/friends/request', (req, res) => {
     UsersStore.update(targetUsername, { pendingReceived: target.pendingReceived });
 
     // Notify target if online
-    const targetSocket = playerByName[targetUsername]?.socket;
-    if (targetSocket) {
-        targetSocket.emit('friendRequest', { from: user.user });
+    const targetSocketId = playerByName[targetUsername];
+    if (targetSocketId) {
+        const targetSocket = io.sockets.sockets.get(targetSocketId);
+        if (targetSocket) {
+            targetSocket.emit('friendRequest', { from: user.user });
+        }
     }
 
     console.log('[Friends] Request sent from', user.user, 'to', targetUsername);
@@ -988,9 +991,12 @@ app.post('/api/friends/respond', (req, res) => {
         UsersStore.update(username, { friends: sender.friends, pendingSent: sender.pendingSent });
 
         // Notify sender if online
-        const senderSocket = playerByName[username]?.socket;
-        if (senderSocket) {
-            senderSocket.emit('friendAccepted', { by: user.user });
+        const senderSocketId = playerByName[username];
+        if (senderSocketId) {
+            const senderSocket = io.sockets.sockets.get(senderSocketId);
+            if (senderSocket) {
+                senderSocket.emit('friendAccepted', { by: user.user });
+            }
         }
 
         res.json({ success: true, friends: user.friends });
@@ -1056,9 +1062,12 @@ app.post('/api/dms/send', (req, res) => {
     if (global.DM_HISTORY[dmKey].length > 100) global.DM_HISTORY[dmKey].shift();
 
     // Send via socket if recipient is online
-    const targetSocket = playerByName[to]?.socket;
-    if (targetSocket) {
-        targetSocket.emit('dm', msg);
+    const targetSocketId = playerByName[to];
+    if (targetSocketId) {
+        const targetSocket = io.sockets.sockets.get(targetSocketId);
+        if (targetSocket) {
+            targetSocket.emit('dm', msg);
+        }
     }
 
     res.json({ success: true, message: msg });
