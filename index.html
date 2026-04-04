@@ -3484,8 +3484,14 @@ const CHARACTERS = {
 
 function getCharacterType(cosmetics){
     if(!cosmetics) return 'default';
-    const skin = cosmetics.skin || cosmetics.character || 'skin_default';
-    if(skin.startsWith('char_')) return skin.replace('char_', '');
+    // Check character field FIRST (e.g., 'char_celestial')
+    if(cosmetics.character && cosmetics.character.startsWith('char_')){
+        return cosmetics.character.replace('char_', '');
+    }
+    // Fallback: check if skin is a character
+    if(cosmetics.skin && cosmetics.skin.startsWith('char_')){
+        return cosmetics.skin.replace('char_', '');
+    }
     return 'default';
 }
 
@@ -4543,7 +4549,7 @@ function initRound(){
         p1x = W*0.25; p2x = W*0.75; py = H-150;
     }
     // Get equipped cosmetics for player 1 (logged-in user)
-    const p1Cosmetics = currentUser?.cosmetics || {skin:'skin_default',trail:'trail_default',aura:'aura_none'};
+    const p1Cosmetics = currentUser?.cosmetics || {skin:'skin_default',trail:'trail_default',aura:'aura_none',character:'char_default'};
     console.log('[Game] Player cosmetics:', JSON.stringify(p1Cosmetics));
     players=[makePlayer(p1x,py,0,p1Cosmetics),makePlayer(p2x,py,1)];
     players.forEach(attachMethods);

@@ -281,7 +281,7 @@ app.post('/api/register', async (req, res) => {
         const rank = getRankForLevel(user.level);
         return res.json({
             success: true, token,
-            user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+            user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
         });
     } else {
         if (isBannedName(username)) return res.status(400).json({ error: 'This username is not allowed' });
@@ -296,7 +296,7 @@ app.post('/api/register', async (req, res) => {
     res.json({
         success: true,
         token,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
     });
 });
 
@@ -355,7 +355,7 @@ app.post('/api/login', async (req, res) => {
     res.json({
         success: true,
         token,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
     });
 });
 
@@ -387,7 +387,7 @@ app.post('/api/login-security', async (req, res) => {
     res.json({
         success: true,
         token,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
     });
 });
 
@@ -433,7 +433,7 @@ app.post('/api/session', (req, res) => {
     const rank = getRankForLevel(user.level);
     res.json({
         success: true,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
     });
 });
 
