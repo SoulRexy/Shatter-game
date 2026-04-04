@@ -1342,11 +1342,15 @@ io.on('connection', (socket) => {
 
     socket.on('getQueuePlayers', () => {
         const now = Date.now();
-        const players = queue.map(q => ({
-            username: q.username,
-            mode: q.mode,
-            time: Math.floor((now - q.joinedAt) / 1000)
-        }));
+        const players = queue.map(q => {
+            const userData = UsersStore.find(u => u.username);
+            return {
+                username: q.username
+                mode: q.mode
+                time: Math.floor((now - q.joinedAt) / 1000),
+                elo: userData ? userData.elo : 1000
+            };
+        });
         socket.emit('queuePlayers', players);
     });
 
