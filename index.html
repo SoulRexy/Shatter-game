@@ -982,6 +982,21 @@ const KBX = 11, KBY = -7;
 const SRNG = 90, SCD = 80;
 const MAXHP = 100, NLIVES = 3;
 
+// ===================== HELPER FUNCTIONS =====================
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function formatQueueTime(seconds) {
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
 // ===================== XP / LEVEL CONFIG =====================
 const XP_PER_KILL = 30;
 const XP_PER_ROUND_WIN = 75;
@@ -1762,13 +1777,6 @@ function fetchQueuePlayers() {
     });
 }
 
-function formatQueueTime(seconds) {
-    if (seconds < 60) return `${seconds}s`;
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
 document.querySelectorAll('.mode-btn').forEach(b=>{
     b.addEventListener('click',()=>{
         document.querySelectorAll('.mode-btn').forEach(x=>x.classList.remove('active'));
@@ -1903,13 +1911,6 @@ function updateQueueDisplay(players) {
             <span class="queue-player-time">${time}</span>
         </div>`;
     }).join('');
-}
-
-function formatQueueTime(seconds) {
-    if (seconds < 60) return `${seconds}s`;
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function startOnlineMatchmaking(){
@@ -2583,13 +2584,6 @@ async function openDM(username){
     document.getElementById('dmStatus').className = 'dm-status '+(friend.online?'':'offline');
 
     renderDMMessages();
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
 }
 
 function renderDMMessages(){
