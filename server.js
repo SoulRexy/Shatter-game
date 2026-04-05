@@ -281,7 +281,7 @@ app.post('/api/register', async (req, res) => {
         const rank = getRankForLevel(user.level);
         return res.json({
             success: true, token,
-            user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+            user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'], friends: user.friends || [], pendingSent: user.pendingSent || [], pendingReceived: user.pendingReceived || [] }
         });
     } else {
         if (isBannedName(username)) return res.status(400).json({ error: 'This username is not allowed' });
@@ -296,7 +296,7 @@ app.post('/api/register', async (req, res) => {
     res.json({
         success: true,
         token,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'], friends: user.friends || [], pendingSent: user.pendingSent || [], pendingReceived: user.pendingReceived || [] }
     });
 });
 
@@ -355,7 +355,7 @@ app.post('/api/login', async (req, res) => {
     res.json({
         success: true,
         token,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'], friends: user.friends || [], pendingSent: user.pendingSent || [], pendingReceived: user.pendingReceived || [] }
     });
 });
 
@@ -387,7 +387,7 @@ app.post('/api/login-security', async (req, res) => {
     res.json({
         success: true,
         token,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'], friends: user.friends || [], pendingSent: user.pendingSent || [], pendingReceived: user.pendingReceived || [] }
     });
 });
 
@@ -433,7 +433,7 @@ app.post('/api/session', (req, res) => {
     const rank = getRankForLevel(user.level);
     res.json({
         success: true,
-        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'] }
+        user: { user: user.user, level: user.level, xp: user.xp, stats: user.stats, rank, isAdmin: user.isAdmin, role: user.role || 'Member', emeralds: user.emeralds || 0, cosmetics: user.cosmetics || {skin:'default',trail:'default',aura:'none',character:'default'}, ownedCosmetics: user.ownedCosmetics || ['default'], friends: user.friends || [], pendingSent: user.pendingSent || [], pendingReceived: user.pendingReceived || [] }
     });
 });
 
@@ -868,7 +868,7 @@ app.post('/api/shop/equip', (req, res) => {
     const owned = user.ownedCosmetics || ['default'];
     if (!owned.includes(itemId) && itemId !== 'none') return res.status(400).json({ error: 'Not owned' });
 
-    const cosmetics = user.cosmetics || { skin:'default', trail:'default', aura:'none' };
+    const cosmetics = user.cosmetics || { skin:'default', trail:'default', aura:'none', character:'default' };
     cosmetics[type] = itemId;
 
     UsersStore.update(user.user, { cosmetics });
@@ -1367,8 +1367,8 @@ io.on('connection', (socket) => {
         const players = queue.map(q => {
             const userData = UsersStore.find(u => u.username);
             return {
-                username: q.username
-                mode: q.mode
+                username: q.username,
+                mode: q.mode,
                 time: Math.floor((now - q.joinedAt) / 1000),
                 elo: userData ? userData.elo : 1000
             };
@@ -1423,6 +1423,57 @@ io.on('connection', (socket) => {
 
     socket.on('pingCheck', (timestamp) => {
         socket.emit('pongCheck', timestamp);
+    });
+
+    // ===================== DM SYSTEM =====================
+    socket.on('sendDM', async (data) => {
+        const { to, message } = data;
+        if (!socket.username) {
+            socket.emit('dmError', { error: 'Not authenticated' });
+            return;
+        }
+
+        const user = UsersStore.find(socket.username);
+        if (!user) {
+            socket.emit('dmError', { error: 'User not found' });
+            return;
+        }
+
+        // Check if friends
+        const friends = user.friends || [];
+        const isFriend = friends.includes(to);
+        if (!isFriend) {
+            socket.emit('dmError', { error: 'Not friends with this user' });
+            return;
+        }
+
+        // Create message
+        const dmKey = [socket.username, to].sort().join('_');
+        if (!global.DM_HISTORY) global.DM_HISTORY = {};
+        if (!global.DM_HISTORY[dmKey]) global.DM_HISTORY[dmKey] = [];
+
+        const msg = {
+            from: socket.username,
+            to,
+            message: (message || '').trim().slice(0, 200),
+            timestamp: Date.now()
+        };
+
+        global.DM_HISTORY[dmKey].push(msg);
+        if (global.DM_HISTORY[dmKey].length > 100) global.DM_HISTORY[dmKey].shift();
+
+        // Send to recipient if online
+        const targetSocketId = playerByName[to];
+        if (targetSocketId) {
+            const targetSocket = io.sockets.sockets.get(targetSocketId);
+            if (targetSocket) {
+                targetSocket.emit('dm', msg);
+            }
+        }
+
+        // Confirm to sender
+        socket.emit('dmSent', msg);
+        console.log(`[DM] ${socket.username} -> ${to}: ${message.slice(0, 20)}...`);
     });
 
     // ===================== DISCONNECT =====================

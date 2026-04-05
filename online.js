@@ -31,6 +31,8 @@ const OnlineManager = (function() {
     let onChatErrorCb = null;
     let onAuthenticatedCb = null;
     let onDMCb = null;
+    let onDmSentCb = null;
+    let onDmErrorCb = null;
     let onFriendRequestCb = null;
     let onFriendAcceptedCb = null;
     let onDamageTakenCb = null;
@@ -243,6 +245,17 @@ const OnlineManager = (function() {
                 console.log('[Online] Damage taken:', data);
                 if (onDamageTakenCb) onDamageTakenCb(data);
             });
+
+            // DM events
+            socket.on('dmSent', (data) => {
+                console.log('[Online] DM sent:', data);
+                if (onDmSentCb) onDmSentCb(data);
+            });
+
+            socket.on('dmError', (data) => {
+                console.error('[Online] DM error:', data);
+                if (onDmErrorCb) onDmErrorCb(data);
+            });
         });
     }
 
@@ -331,6 +344,18 @@ const OnlineManager = (function() {
     function onChatMuted(cb) { onChatMutedCb = cb; }
     function onChatError(cb) { onChatErrorCb = cb; }
     function onDM(cb) { onDMCb = cb; }
+
+    function sendDM(to, message) {
+        if (!socket || !socket.connected) {
+            console.warn('[Online] Cannot send DM - not connected');
+            return false;
+        }
+        socket.emit('sendDM', { to, message });
+        return true;
+    }
+
+    function onDmSent(cb) { onDmSentCb = cb; }
+    function onDmError(cb) { onDmErrorCb = cb; }
     function onFriendRequest(cb) { onFriendRequestCb = cb; }
     function onFriendAccepted(cb) { onFriendAcceptedCb = cb; }
     function onDamageTaken(cb) { onDamageTakenCb = cb; }
@@ -381,7 +406,7 @@ const OnlineManager = (function() {
         onBanned, onKicked, onAnnouncement, onAccountDeleted,
         onServerRestarting, onAuthFailed, onAuthenticated, onRenamed,
         onChatMessage, onChatHistory, onChatPing, onRoleChanged, onChatMuted, onChatError, sendChat,
-        onDM, onFriendRequest, onFriendAccepted, onDamageTaken,
+        onDM, sendDM, onDmSent, onDmError, onFriendRequest, onFriendAccepted, onDamageTaken,
         isConnected, getLatency, isInQueue, isInMatch, getQueuePlayers,
         findRankedMatch, findCasualMatch
     };

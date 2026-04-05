@@ -467,6 +467,22 @@
             .lives-d{font-size:11px}
         }
 
+        /* Hide PC controls on mobile */
+        body.is-mobile .pc-controls-section{display:none!important}
+        body.is-mobile .mobile-controls-section{display:block!important}
+        .mobile-controls-section{display:none}
+
+        /* Mobile customization sliders */
+        .mobile-setting-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+        .mobile-setting-row:last-child{border-bottom:none}
+        .mobile-setting-label{font-size:11px;color:#888;letter-spacing:1px}
+        .mobile-setting-value{font-size:11px;color:#00f3ff;min-width:35px;text-align:right}
+        .mobile-slider{-webkit-appearance:none;width:100px;height:4px;border-radius:2px;background:rgba(255,255,255,.1);outline:none}
+        .mobile-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#00f3ff;cursor:pointer}
+        .mobile-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#00f3ff;cursor:pointer;border:none}
+        .mobile-setting-btns{display:flex;gap:8px;margin-top:10px}
+        .mobile-setting-btns button{flex:1}
+
         /* Mobile menu adjustments */
         @media(max-width:768px){
             .ctrl-wrap{flex-direction:column;gap:20px}
@@ -804,18 +820,35 @@
         </div>
         <!-- Action Buttons -->
         <div id="actionButtons">
-            <div class="action-row">
-                <button class="touch-btn btn-shatter" data-action="shatter">SHATTER</button>
-            </div>
-            <div class="action-row">
-                <button class="touch-btn btn-dash" data-action="dash">DASH</button>
-                <button class="touch-btn btn-attack" data-action="attack">ATK</button>
-            </div>
-            <div class="action-row">
-                <button class="touch-btn btn-jump" data-action="jump">JUMP</button>
-            </div>
+            <button class="touch-btn btn-jump" data-action="jump">JUMP</button>
+            <button class="touch-btn btn-attack" data-action="attack">ATK</button>
+            <button class="touch-btn btn-dash" data-action="dash">DASH</button>
+            <button class="touch-btn btn-shatter" data-action="shatter">SHATTER</button>
         </div>
     </div>
+
+    <script src="index-mobile-fix.js"></script>
+    <script>
+// Initialize mobile settings panel
+function initMobileSettingsPanel() {
+    if (!isTouchDevice) return;
+
+    document.getElementById('mobileJoystickX').value = mobileConfig.joystickX;
+    document.getElementById('mobileJoystickY').value = mobileConfig.joystickY;
+    document.getElementById('mobileJoystickSize').value = mobileConfig.joystickSize;
+    document.getElementById('mobileJoystickSizeVal').textContent = mobileConfig.joystickSize;
+
+    document.getElementById('mobileButtonsX').value = mobileConfig.buttonsX;
+    document.getElementById('mobileButtonsY').value = mobileConfig.buttonsY;
+    document.getElementById('mobileButtonSize').value = mobileConfig.buttonSize;
+
+            if (event) return;
+            keys[leftCode] = true;
+            keys[rightCode] = true;
+        };
+
+    }
+}
 
     <div id="xpPopups" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:6"></div>
 
@@ -903,7 +936,7 @@
                 </div>
             </div>
 
-            <div class="s-section">
+            <div class="s-section pc-controls-section">
                 <div class="s-section-title">CONTROLS</div>
                 <div style="font-size:10px;color:#555;margin-bottom:8px">Left click a key to select it, then press any key or right click to rebind</div>
                 <div style="display:flex;gap:20px;flex-wrap:wrap">
@@ -928,6 +961,53 @@
                 </div>
                 <div class="s-btn-row" style="margin-top:12px">
                     <button class="s-btn" id="ctrlResetBtn">RESET TO DEFAULTS</button>
+                </div>
+            </div>
+
+            <div class="s-section mobile-controls-section">
+                <div class="s-section-title">MOBILE CONTROLS</div>
+                <div style="font-size:10px;color:#555;margin-bottom:12px">Customize your touch controls</div>
+
+                <div class="mobile-setting-row">
+                    <span class="mobile-setting-label">Joystick Size</span>
+                    <input type="range" class="mobile-slider" id="mobileJoystickSize" min="60" max="140" value="100">
+                    <span class="mobile-setting-value" id="mobileJoystickSizeVal">100</span>
+                </div>
+                <div class="mobile-setting-row">
+                    <span class="mobile-setting-label">Button Size</span>
+                    <input type="range" class="mobile-slider" id="mobileButtonSize" min="40" max="80" value="55">
+                    <span class="mobile-setting-value" id="mobileButtonSizeVal">55</span>
+                </div>
+                <div class="mobile-setting-row">
+                    <span class="mobile-setting-label">Joystick Side</span>
+                    <select id="mobileJoystickSide" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px">
+                        <option value="left">Left Side</option>
+                        <option value="right">Right Side</option>
+                    </select>
+                </div>
+                <div class="mobile-setting-row">
+                    <span class="mobile-setting-label">Joystick X Offset</span>
+                    <input type="range" class="mobile-slider" id="mobileJoystickX" min="5" max="50" value="10">
+                    <span class="mobile-setting-value" id="mobileJoystickXVal">10</span>
+                </div>
+                <div class="mobile-setting-row">
+                    <span class="mobile-setting-label">Joystick Y Offset</span>
+                    <input type="range" class="mobile-slider" id="mobileJoystickY" min="5" max="50" value="20">
+                    <span class="mobile-setting-value" id="mobileJoystickYVal">20</span>
+                </div>
+                <div class="mobile-setting-row">
+                    <span class="mobile-setting-label">Buttons X Offset</span>
+                    <input type="range" class="mobile-slider" id="mobileButtonsX" min="5" max="50" value="10">
+                    <span class="mobile-setting-value" id="mobileButtonsXVal">10</span>
+                </div>
+                <div class="mobile-setting-row">
+                    <span class="mobile-setting-label">Buttons Y Offset</span>
+                    <input type="range" class="mobile-slider" id="mobileButtonsY" min="5" max="50" value="15">
+                    <span class="mobile-setting-value" id="mobileButtonsYVal">15</span>
+                </div>
+
+                <div class="mobile-setting-btns">
+                    <button class="s-btn" id="mobileResetBtn" style="font-size:10px;padding:6px 12px">RESET TO DEFAULTS</button>
                 </div>
             </div>
 
@@ -3440,6 +3520,9 @@ const COSMETIC_COLORS = {
     skin_fire: '#ff4400',
     skin_toxic: '#00ff44',
     skin_gold: '#ffd700',
+    skin_ghost: '#88ccff',
+    skin_blood: '#aa0033',
+    skin_void: '#1a0033',
     // Character skins
     char_shadow: '#1a0033',
     char_flame: '#ff3300',
@@ -3484,14 +3567,20 @@ const CHARACTERS = {
 
 function getCharacterType(cosmetics){
     if(!cosmetics) return 'default';
+    console.log('[getCharacterType] cosmetics:', JSON.stringify(cosmetics));
     // Check character field FIRST (e.g., 'char_celestial')
     if(cosmetics.character && cosmetics.character.startsWith('char_')){
-        return cosmetics.character.replace('char_', '');
+        const charType = cosmetics.character.replace('char_', '');
+        console.log('[getCharacterType] Returning:', charType);
+        return charType;
     }
     // Fallback: check if skin is a character
     if(cosmetics.skin && cosmetics.skin.startsWith('char_')){
-        return cosmetics.skin.replace('char_', '');
+        const charType = cosmetics.skin.replace('char_', '');
+        console.log('[getCharacterType] Fallback to skin', charType);
+        return charType;
     }
+    console.log('[getCharacterType] No character field found, returning default');
     return 'default';
 }
 
@@ -3504,8 +3593,8 @@ function makePlayer(x,y,id,cosmetics={}){
     const charType = getCharacterType(cosmetics);
     const charData = CHARACTERS[charType] || CHARACTERS.default;
 
-    // Get skin/character color from cosmetics
-    const skinId = cosmetics.skin || cosmetics.character || 'skin_default';
+    // Get skin color (only from skin field, NOT character)
+    const skinId = cosmetics.skin || 'skin_default';
     const skinColor = COSMETIC_COLORS[skinId];
     const baseColor = skinColor || defaultColor;
 
@@ -3522,7 +3611,7 @@ function makePlayer(x,y,id,cosmetics={}){
     // Character glow color
     const charGlow = charData.glowColor ? `rgba(${hexToRgb(charData.glowColor)},0.5)` : defaultGlow;
 
-    console.log('[Cosmetics] Player', id, 'char:', charType, 'skin:', skinId, 'trail:', trailId, 'aura:', auraId);
+    console.log('[Cosmetics] Player', id, 'char:', charType, 'charData.bodyType:', (charData ? charData.bodyType : 'none'), 'skin:', skinId, 'skinColor:', skinColor, 'trail:', trailId, 'aura:', auraId);
 
     return {
         x,y,spawnX:x,spawnY:y,
@@ -4950,7 +5039,183 @@ function initMobileControls() {
 
 // Initialize mobile controls on page load
 if (isTouchDevice) {
-    window.addEventListener('load', initMobileControls);
+    document.body.classList.add('is-mobile');
+    window.addEventListener('load', () => {
+        loadMobileConfig();
+        initMobileControls();
+    });
+}
+
+// ===================== MOBILE CONFIG =====================
+const defaultMobileConfig = {
+    joystickSize: 100,
+    buttonSize: 55,
+    joystickSide: 'left',
+    joystickX: 10,
+    joystickY: 20,
+    buttonsX: 10,
+    buttonsY: 15
+};
+let mobileConfig = { ...defaultMobileConfig };
+let activeButtonTouches = {}; // Track active button touches to prevent double input
+
+const JOYSTICK_DEADZONE = 12;
+const JOYSTICK_MAXDIST = 35;
+
+// Load saved mobile config
+function loadMobileConfig() {
+    try {
+        const saved = localStorage.getItem('shatter_mobile');
+        if (saved) {
+            mobileConfig = { ...defaultMobileConfig, ...JSON.parse(saved) };
+        }
+    } catch (e) {
+        console.warn('Failed to load mobile config:', e);
+    }
+}
+
+// Save mobile config
+function saveMobileConfig() {
+    try {
+        localStorage.setItem('shatter_mobile', JSON.stringify(mobileConfig));
+    } catch (e) {
+        console.warn('Failed to save mobile config:', e);
+    }
+}
+
+// Apply mobile config to UI
+function applyMobileConfig() {
+    const joystickArea = document.getElementById('joystickArea');
+    const joystickBase = document.getElementById('joystickBase');
+    const joystickThumb = document.getElementById('joystickThumb');
+    const actionButtons = document.getElementById('actionButtons');
+
+    if (!joystickArea || !joystickBase || !joystickThumb || !actionButtons) return;
+
+
+    const size = mobileConfig.joystickSize;
+    const btnSize = mobileConfig.buttonSize;
+    const joySide = mobileConfig.joystickSide;
+    const joyX = mobileConfig.joystickX;
+    const joyY = mobileConfig.joystickY;
+    const btnX = mobileConfig.buttonsX;
+    const btnY = mobileConfig.buttonsY;
+
+    // Apply joystick size
+    joystickBase.style.width = size + 'px';
+    joystickBase.style.height = size + 'px';
+    joystickThumb.style.width = (size * 0.4) + 'px';
+    joystickThumb.style.height = (size * 0.4) + 'px';
+    joystickArea.style.width = (size + 20) + 'px';
+    joystickArea.style.height = (size + 20) + 'px';
+
+    // Apply joystick position
+    joystickArea.style.bottom = joyY + 'px';
+    if (joySide === 'left') {
+        joystickArea.style.left = joyX + 'px';
+        joystickArea.style.right = 'auto';
+    } else {
+        joystickArea.style.left = 'auto';
+        joystickArea.style.right = joyX + 'px';
+    }
+
+    // Apply button sizes
+    const buttons = actionButtons.querySelectorAll('.touch-btn');
+    buttons.forEach(btn => {
+        btn.style.width = btnSize + 'px';
+        btn.style.height = btnSize + 'px';
+        btn.style.fontSize = Math.max(8, btnSize * 0.15) + 'px';
+    }
+
+    // Apply button position
+    actionButtons.style.bottom = btnY + 'px';
+    if (joySide === 'left') {
+        actionButtons.style.left = 'auto';
+        actionButtons.style.right = btnX + 'px';
+    } else {
+        actionButtons.style.left = btnX + 'px';
+        actionButtons.style.right = 'auto';
+    }
+}
+
+// Initialize mobile settings panel
+function initMobileSettingsPanel() {
+    if (!isTouchDevice) return;
+
+    // Load saved config first
+    loadMobileConfig();
+
+    // Set slider values
+    document.getElementById('mobileJoystickSize').value = mobileConfig.joystickSize;
+    document.getElementById('mobileJoystickSizeVal').textContent = mobileConfig.joystickSize;
+    document.getElementById('mobileButtonSize').value = mobileConfig.buttonSize;
+    document.getElementById('mobileButtonSizeVal').textContent = mobileConfig.buttonSize;
+    document.getElementById('mobileJoystickSide').value = mobileConfig.joystickSide;
+    document.getElementById('mobileJoystickX').value = mobileConfig.joystickX;
+    document.getElementById('mobileJoystickXVal').textContent = mobileConfig.joystickX;
+    document.getElementById('mobileJoystickY').value = mobileConfig.joystickY;
+    document.getElementById('mobileJoystickYVal').textContent = mobileConfig.joystickY;
+    document.getElementById('mobileButtonsX').value = mobileConfig.buttonsX;
+    document.getElementById('mobileButtonsXVal').textContent = mobileConfig.buttonsX;
+    document.getElementById('mobileButtonsY').value = mobileConfig.buttonsY;
+    document.getElementById('mobileButtonsYVal').textContent = mobileConfig.buttonsY;
+
+    // Add event listeners for sliders
+    document.getElementById('mobileJoystickSize').addEventListener('input', (e) => {
+        mobileConfig.joystickSize = parseInt(e.target.value);
+        document.getElementById('mobileJoystickSizeVal').textContent = mobileConfig.joystickSize;
+        saveMobileConfig();
+        applyMobileConfig();
+    });
+
+    document.getElementById('mobileButtonSize').addEventListener('input', (e) => {
+        mobileConfig.buttonSize = parseInt(e.target.value);
+        document.getElementById('mobileButtonSizeVal').textContent = mobileConfig.buttonSize;
+        saveMobileConfig();
+        applyMobileConfig();
+    });
+
+    document.getElementById('mobileJoystickSide').addEventListener('change', (e) => {
+        mobileConfig.joystickSide = e.target.value;
+        saveMobileConfig();
+        applyMobileConfig();
+    });
+
+    document.getElementById('mobileJoystickX').addEventListener('input', (e) => {
+        mobileConfig.joystickX = parseInt(e.target.value);
+        document.getElementById('mobileJoystickXVal').textContent = mobileConfig.joystickX;
+        saveMobileConfig();
+        applyMobileConfig();
+    });
+
+    document.getElementById('mobileJoystickY').addEventListener('input', (e) => {
+        mobileConfig.joystickY = parseInt(e.target.value);
+        document.getElementById('mobileJoystickYVal').textContent = mobileConfig.joystickY;
+        saveMobileConfig();
+        applyMobileConfig();
+    });
+
+    document.getElementById('mobileButtonsX').addEventListener('input', (e) => {
+        mobileConfig.buttonsX = parseInt(e.target.value);
+        document.getElementById('mobileButtonsXVal').textContent = mobileConfig.buttonsX;
+        saveMobileConfig();
+        applyMobileConfig();
+    });
+
+    document.getElementById('mobileButtonsY').addEventListener('input', (e) => {
+        mobileConfig.buttonsY = parseInt(e.target.value);
+        document.getElementById('mobileButtonsYVal').textContent = mobileConfig.buttonsY;
+        saveMobileConfig();
+        applyMobileConfig();
+    });
+
+    // Reset button
+    document.getElementById('mobileResetBtn').addEventListener('click', () => {
+        mobileConfig = { ...defaultMobileConfig };
+        saveMobileConfig();
+        initMobileSettingsPanel();
+        applyMobileConfig();
+    });
 }
 </script>
 </body>
