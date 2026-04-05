@@ -8,15 +8,26 @@ let activeButtonTouches = {}; // Track active button touches to prevent double i
 const JOYSTICK_DEADZONE = 12;
 const JOYSTICK_MAXDIST = 35;
 
+// Mobile speed adjustment - slower acceleration to match PC feel
+const MOBILE_LERP_FACTOR = 0.18; // Lower than PC's 0.3 for smoother acceleration
+
 // Default mobile config
 const defaultMobileConfig = {
     joystickSize: 100,
+    joystickOpacity: 100,
     buttonSize: 55,
+    buttonOpacity: 100,
     joystickSide: 'left',
-    joystickX: 10,
-    joystickY: 20,
-    buttonsX: 10,
-    buttonsY: 15
+    joystickX: 80,
+    joystickY: 80,
+    jumpX: 460,
+    jumpY: 80,
+    attackX: 540,
+    attackY: 80,
+    dashX: 460,
+    dashY: 150,
+    shatterX: 540,
+    shatterY: 150
 };
 let mobileConfig = { ...defaultMobileConfig };
 
@@ -51,127 +62,353 @@ function applyMobileConfig() {
     if (!joystickArea || !joystickBase || !joystickThumb || !actionButtons) return;
 
     const size = mobileConfig.joystickSize;
+    const joyOpacity = mobileConfig.joystickOpacity / 100;
     const btnSize = mobileConfig.buttonSize;
-    const joySide = mobileConfig.joystickSide;
+    const btnOpacity = mobileConfig.buttonOpacity / 100;
     const joyX = mobileConfig.joystickX;
     const joyY = mobileConfig.joystickY;
-    const btnX = mobileConfig.buttonsX;
-    const btnY = mobileConfig.buttonsY;
 
-    // Apply joystick size
+    // Apply joystick size and opacity
     joystickBase.style.width = size + 'px';
     joystickBase.style.height = size + 'px';
+    joystickBase.style.opacity = joyOpacity;
     joystickThumb.style.width = (size * 0.4) + 'px';
     joystickThumb.style.height = (size * 0.4) + 'px';
     joystickArea.style.width = (size + 20) + 'px';
     joystickArea.style.height = (size + 20) + 'px';
 
     // Apply joystick position
+    joystickArea.style.left = joyX + 'px';
     joystickArea.style.bottom = joyY + 'px';
-    if (joySide === 'left') {
-        joystickArea.style.left = joyX + 'px';
-        joystickArea.style.right = 'auto';
-    } else {
-        joystickArea.style.left = 'auto';
-        joystickArea.style.right = joyX + 'px';
-    }
 
-    // Apply button sizes
+    // Apply button sizes, opacity and positions
     const buttons = actionButtons.querySelectorAll('.touch-btn');
+    const btnPositions = {
+        jump: { x: mobileConfig.jumpX, y: mobileConfig.jumpY },
+        attack: { x: mobileConfig.attackX, y: mobileConfig.attackY },
+        dash: { x: mobileConfig.dashX, y: mobileConfig.dashY },
+        shatter: { x: mobileConfig.shatterX, y: mobileConfig.shatterY }
+    };
+
     buttons.forEach(btn => {
+        const action = btn.dataset.action;
         btn.style.width = btnSize + 'px';
         btn.style.height = btnSize + 'px';
         btn.style.fontSize = Math.max(8, btnSize * 0.15) + 'px';
-    });
+        btn.style.opacity = btnOpacity;
 
-    // Apply button position
-    actionButtons.style.bottom = btnY + 'px';
-    if (joySide === 'left') {
-        actionButtons.style.left = 'auto';
-        actionButtons.style.right = btnX + 'px';
-    } else {
-        actionButtons.style.left = btnX + 'px';
-        actionButtons.style.right = 'auto';
-    }
+        // Apply individual button positions
+        if (btnPositions[action]) {
+            if (btnPositions[action].x !== 0 || btnPositions[action].y !== 0) {
+                btn.style.position = 'absolute';
+                btn.style.right = 'auto';
+                btn.style.left = btnPositions[action].x + 'px';
+                btn.style.bottom = btnPositions[action].y + 'px';
+            }
+        }
+    });
 }
 
-// Initialize mobile settings panel
-function initMobileSettingsPanel() {
-    if (!isTouchDevice) return;
+// ==================== CUSTOMIZE CONTROLS MODE ====================
+let customizeMode = false;
+let dragTarget = null;
+let dragOffset = { x: 0, y: 0 };
+let editingControl = null;
 
-    // Load saved config first
+function enterCustomizeMode() {
+    customizeMode = true;
+    const overlay = document.getElementById('customizeOverlay');
+    if (!overlay) return;
+
+    overlay.style.display = 'block';
     loadMobileConfig();
+    applyCustomizePositions();
+}
 
-    // Set slider values
-    document.getElementById('mobileJoystickSize').value = mobileConfig.joystickSize;
-    document.getElementById('mobileJoystickSizeVal').textContent = mobileConfig.joystickSize;
-    document.getElementById('mobileButtonSize').value = mobileConfig.buttonSize;
-    document.getElementById('mobileButtonSizeVal').textContent = mobileConfig.buttonSize;
-    document.getElementById('mobileJoystickSide').value = mobileConfig.joystickSide;
-    document.getElementById('mobileJoystickX').value = mobileConfig.joystickX;
-    document.getElementById('mobileJoystickXVal').textContent = mobileConfig.joystickX;
-    document.getElementById('mobileJoystickY').value = mobileConfig.joystickY;
-    document.getElementById('mobileJoystickYVal').textContent = mobileConfig.joystickY;
-    document.getElementById('mobileButtonsX').value = mobileConfig.buttonsX;
-    document.getElementById('mobileButtonsXVal').textContent = mobileConfig.buttonsX;
-    document.getElementById('mobileButtonsY').value = mobileConfig.buttonsY;
-    document.getElementById('mobileButtonsYVal').textContent = mobileConfig.buttonsY;
+function exitCustomizeMode() {
+    customizeMode = false;
+    const overlay = document.getElementById('customizeOverlay');
+    if (overlay) overlay.style.display = 'none';
+    closeControlEditPopup();
+    saveMobileConfig();
+    applyMobileConfig();
+}
 
-    // Add event listeners for sliders
-    document.getElementById('mobileJoystickSize').addEventListener('input', (e) => {
-        mobileConfig.joystickSize = parseInt(e.target.value);
-        document.getElementById('mobileJoystickSizeVal').textContent = mobileConfig.joystickSize;
-        saveMobileConfig();
-        applyMobileConfig();
+function applyCustomizePositions() {
+    const joyArea = document.getElementById('customizeJoystickArea');
+    if (joyArea) {
+        joyArea.style.left = mobileConfig.joystickX + 'px';
+        joyArea.style.bottom = mobileConfig.joystickY + 'px';
+
+        const base = document.getElementById('customizeJoystickBase');
+        if (base) {
+            base.style.width = mobileConfig.joystickSize + 'px';
+            base.style.height = mobileConfig.joystickSize + 'px';
+            base.style.opacity = mobileConfig.joystickOpacity / 100;
+        }
+        const thumb = document.getElementById('customizeJoystickThumb');
+        if (thumb) {
+            thumb.style.width = (mobileConfig.joystickSize * 0.4) + 'px';
+            thumb.style.height = (mobileConfig.joystickSize * 0.4) + 'px';
+        }
+    }
+
+    const buttons = document.querySelectorAll('.customize-btn');
+    const btnPositions = {
+        jump: { x: mobileConfig.jumpX, y: mobileConfig.jumpY },
+        attack: { x: mobileConfig.attackX, y: mobileConfig.attackY },
+        dash: { x: mobileConfig.dashX, y: mobileConfig.dashY },
+        shatter: { x: mobileConfig.shatterX, y: mobileConfig.shatterY }
+    };
+
+    buttons.forEach(btn => {
+        const action = btn.dataset.control;
+        if (btnPositions[action]) {
+            btn.style.left = btnPositions[action].x + 'px';
+            btn.style.bottom = btnPositions[action].y + 'px';
+            btn.style.width = mobileConfig.buttonSize + 'px';
+            btn.style.height = mobileConfig.buttonSize + 'px';
+            btn.style.opacity = mobileConfig.buttonOpacity / 100;
+        }
+    });
+}
+
+function openControlEditPopup(controlType, element) {
+    editingControl = controlType;
+    const popup = document.getElementById('controlEditPopup');
+    const title = document.getElementById('controlEditTitle');
+    const sizeSlider = document.getElementById('controlSizeSlider');
+    const opacitySlider = document.getElementById('controlOpacitySlider');
+
+    if (!popup) return;
+
+    // Set title
+    const titles = {
+        joystick: 'JOYSTICK',
+        jump: 'JUMP',
+        attack: 'ATTACK',
+        dash: 'DASH',
+        shatter: 'SHATTER'
+    };
+    title.textContent = titles[controlType] || controlType.toUpperCase();
+
+    // Set current values
+    if (controlType === 'joystick') {
+        sizeSlider.value = mobileConfig.joystickSize;
+        opacitySlider.value = mobileConfig.joystickOpacity;
+    } else {
+        sizeSlider.value = mobileConfig.buttonSize;
+        opacitySlider.value = mobileConfig.buttonOpacity;
+    }
+
+    // Position popup near the element
+    const rect = element.getBoundingClientRect();
+    popup.style.left = Math.min(rect.left, window.innerWidth - 200) + 'px';
+    popup.style.top = Math.max(60, rect.top - 120) + 'px';
+    popup.style.display = 'block';
+}
+
+function closeControlEditPopup() {
+    editingControl = null;
+    const popup = document.getElementById('controlEditPopup');
+    if (popup) popup.style.display = 'none';
+}
+
+function initCustomizeControls() {
+    const customizeBtn = document.getElementById('customizeControlsBtn');
+    if (customizeBtn) {
+        customizeBtn.addEventListener('click', enterCustomizeMode);
+    }
+
+    const doneBtn = document.getElementById('customizeDoneBtn');
+    if (doneBtn) {
+        doneBtn.addEventListener('click', exitCustomizeMode);
+    }
+
+    const resetBtn = document.getElementById('customizeResetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            mobileConfig = { ...defaultMobileConfig };
+            applyCustomizePositions();
+        });
+    }
+
+    const closeEditBtn = document.getElementById('controlEditClose');
+    if (closeEditBtn) {
+        closeEditBtn.addEventListener('click', closeControlEditPopup);
+    }
+
+    // Size slider
+    const sizeSlider = document.getElementById('controlSizeSlider');
+    if (sizeSlider) {
+        sizeSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (editingControl === 'joystick') {
+                mobileConfig.joystickSize = val;
+                const base = document.getElementById('customizeJoystickBase');
+                const thumb = document.getElementById('customizeJoystickThumb');
+                if (base) {
+                    base.style.width = val + 'px';
+                    base.style.height = val + 'px';
+                }
+                if (thumb) {
+                    thumb.style.width = (val * 0.4) + 'px';
+                    thumb.style.height = (val * 0.4) + 'px';
+                }
+            } else {
+                mobileConfig.buttonSize = val;
+                document.querySelectorAll('.customize-btn').forEach(btn => {
+                    btn.style.width = val + 'px';
+                    btn.style.height = val + 'px';
+                });
+            }
+        });
+    }
+
+    // Opacity slider
+    const opacitySlider = document.getElementById('controlOpacitySlider');
+    if (opacitySlider) {
+        opacitySlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            const opacity = val / 100;
+            if (editingControl === 'joystick') {
+                mobileConfig.joystickOpacity = val;
+                const base = document.getElementById('customizeJoystickBase');
+                if (base) base.style.opacity = opacity;
+            } else {
+                mobileConfig.buttonOpacity = val;
+                document.querySelectorAll('.customize-btn').forEach(btn => {
+                    btn.style.opacity = opacity;
+                });
+            }
+        });
+    }
+
+    // Drag and tap handlers for joystick
+    const joyArea = document.getElementById('customizeJoystickArea');
+    if (joyArea) {
+        // Tap to edit
+        joyArea.addEventListener('click', (e) => {
+            if (!dragTarget) {
+                openControlEditPopup('joystick', joyArea);
+            }
+        });
+
+        // Drag to move
+        joyArea.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#controlEditPopup')) return;
+            dragTarget = joyArea;
+            const touch = e.touches[0];
+            const rect = joyArea.getBoundingClientRect();
+            dragOffset.x = touch.clientX - rect.left;
+            dragOffset.y = touch.clientY - rect.top;
+            e.preventDefault();
+        }, { passive: false });
+    }
+
+    // Drag and tap handlers for buttons
+    document.querySelectorAll('.customize-btn').forEach(btn => {
+        // Tap to edit
+        btn.addEventListener('click', (e) => {
+            if (!dragTarget) {
+                openControlEditPopup(btn.dataset.control, btn);
+            }
+        });
+
+        // Drag to move
+        btn.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#controlEditPopup')) return;
+            dragTarget = btn;
+            const touch = e.touches[0];
+            const rect = btn.getBoundingClientRect();
+            dragOffset.x = touch.clientX - rect.left;
+            dragOffset.y = touch.clientY - rect.top;
+            e.preventDefault();
+        }, { passive: false });
     });
 
-    document.getElementById('mobileButtonSize').addEventListener('input', (e) => {
-        mobileConfig.buttonSize = parseInt(e.target.value);
-        document.getElementById('mobileButtonSizeVal').textContent = mobileConfig.buttonSize;
-        saveMobileConfig();
-        applyMobileConfig();
+    // Touch move handler
+    document.addEventListener('touchmove', (e) => {
+        if (!dragTarget || !customizeMode) return;
+        if (e.target.closest('#controlEditPopup')) return;
+
+        const touch = e.touches[0];
+        const x = touch.clientX - dragOffset.x;
+        const y = window.innerHeight - touch.clientY - (dragTarget.offsetHeight - dragOffset.y);
+
+        dragTarget.style.left = x + 'px';
+        dragTarget.style.bottom = Math.max(0, y) + 'px';
+
+        // Save position
+        if (dragTarget.id === 'customizeJoystickArea') {
+            mobileConfig.joystickX = x;
+            mobileConfig.joystickY = Math.max(0, y);
+        } else {
+            const control = dragTarget.dataset.control;
+            if (control === 'jump') { mobileConfig.jumpX = x; mobileConfig.jumpY = Math.max(0, y); }
+            else if (control === 'attack') { mobileConfig.attackX = x; mobileConfig.attackY = Math.max(0, y); }
+            else if (control === 'dash') { mobileConfig.dashX = x; mobileConfig.dashY = Math.max(0, y); }
+            else if (control === 'shatter') { mobileConfig.shatterX = x; mobileConfig.shatterY = Math.max(0, y); }
+        }
+
+        e.preventDefault();
+    }, { passive: false });
+
+    // Touch end handler
+    document.addEventListener('touchend', (e) => {
+        if (dragTarget) {
+            setTimeout(() => { dragTarget = null; }, 100);
+        }
     });
 
-    document.getElementById('mobileJoystickSide').addEventListener('change', (e) => {
-        mobileConfig.joystickSide = e.target.value;
-        saveMobileConfig();
-        applyMobileConfig();
+    // Mouse support for testing on PC
+    let mouseDown = false;
+    document.addEventListener('mousedown', (e) => {
+        if (!customizeMode) return;
+        if (e.target.closest('#controlEditPopup')) return;
+
+        const joyArea = document.getElementById('customizeJoystickArea');
+        const btn = e.target.closest('.customize-btn');
+
+        if (joyArea && joyArea.contains(e.target)) {
+            dragTarget = joyArea;
+            const rect = joyArea.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            mouseDown = true;
+        } else if (btn) {
+            dragTarget = btn;
+            const rect = btn.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            mouseDown = true;
+        }
     });
 
-    document.getElementById('mobileJoystickX').addEventListener('input', (e) => {
-        mobileConfig.joystickX = parseInt(e.target.value);
-        document.getElementById('mobileJoystickXVal').textContent = mobileConfig.joystickX;
-        saveMobileConfig();
-        applyMobileConfig();
+    document.addEventListener('mousemove', (e) => {
+        if (!dragTarget || !customizeMode || !mouseDown) return;
+
+        const x = e.clientX - dragOffset.x;
+        const y = window.innerHeight - e.clientY - (dragTarget.offsetHeight - dragOffset.y);
+
+        dragTarget.style.left = x + 'px';
+        dragTarget.style.bottom = Math.max(0, y) + 'px';
+
+        if (dragTarget.id === 'customizeJoystickArea') {
+            mobileConfig.joystickX = x;
+            mobileConfig.joystickY = Math.max(0, y);
+        } else {
+            const control = dragTarget.dataset.control;
+            if (control === 'jump') { mobileConfig.jumpX = x; mobileConfig.jumpY = Math.max(0, y); }
+            else if (control === 'attack') { mobileConfig.attackX = x; mobileConfig.attackY = Math.max(0, y); }
+            else if (control === 'dash') { mobileConfig.dashX = x; mobileConfig.dashY = Math.max(0, y); }
+            else if (control === 'shatter') { mobileConfig.shatterX = x; mobileConfig.shatterY = Math.max(0, y); }
+        }
     });
 
-    document.getElementById('mobileJoystickY').addEventListener('input', (e) => {
-        mobileConfig.joystickY = parseInt(e.target.value);
-        document.getElementById('mobileJoystickYVal').textContent = mobileConfig.joystickY;
-        saveMobileConfig();
-        applyMobileConfig();
-    });
-
-    document.getElementById('mobileButtonsX').addEventListener('input', (e) => {
-        mobileConfig.buttonsX = parseInt(e.target.value);
-        document.getElementById('mobileButtonsXVal').textContent = mobileConfig.buttonsX;
-        saveMobileConfig();
-        applyMobileConfig();
-    });
-
-    document.getElementById('mobileButtonsY').addEventListener('input', (e) => {
-        mobileConfig.buttonsY = parseInt(e.target.value);
-        document.getElementById('mobileButtonsYVal').textContent = mobileConfig.buttonsY;
-        saveMobileConfig();
-        applyMobileConfig();
-    });
-
-    // Reset button
-    document.getElementById('mobileResetBtn').addEventListener('click', () => {
-        mobileConfig = { ...defaultMobileConfig };
-        saveMobileConfig();
-        initMobileSettingsPanel();
-        applyMobileConfig();
+    document.addEventListener('mouseup', () => {
+        mouseDown = false;
+        dragTarget = null;
     });
 }
 
@@ -183,7 +420,7 @@ function updateMobileControlsVisibility() {
     const isPortrait = window.innerHeight > window.innerWidth;
 
     // Show controls only during gameplay
-    if (isPlaying) {
+    if (isPlaying && !customizeMode) {
         mobileControls.classList.add('visible');
         // Show rotate overlay in portrait mode during gameplay
         if (isPortrait) {
@@ -202,7 +439,7 @@ function initMobileControls() {
 
     loadMobileConfig();
     applyMobileConfig();
-    initMobileSettingsPanel();
+    initCustomizeControls();
 
     const joystickArea = document.getElementById('joystickArea');
     const joystickThumb = document.getElementById('joystickThumb');
@@ -311,7 +548,7 @@ function initMobileControls() {
             delete activeButtonTouches[touchKey];
             keys[keyCode] = false;
             btn.classList.remove('pressed');
-        }, { passive: false })
+        }, { passive: false });
 
         btn.addEventListener('touchcancel', (e) => {
             delete activeButtonTouches[touchKey];
@@ -333,3 +570,7 @@ if (isTouchDevice) {
         initMobileControls();
     });
 }
+
+// Export for use in main game
+window.isTouchDevice = isTouchDevice;
+window.MOBILE_LERP_FACTOR = MOBILE_LERP_FACTOR;
