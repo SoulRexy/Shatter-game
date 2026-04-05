@@ -4,7 +4,7 @@ const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 
 let touchJoystickActive = false;
 let touchJoystickStart = { x: 0, y: 0 };
 let touchJoystickId = null;
-const activeButtonTouches = {}; // Track active button touches to prevent double input
+let activeButtonTouches = {}; // Track active button touches to prevent double input
 const JOYSTICK_DEADZONE = 12;
 const JOYSTICK_MAXDIST = 35;
 
@@ -19,10 +19,6 @@ const defaultMobileConfig = {
     buttonsY: 15
 };
 let mobileConfig = { ...defaultMobileConfig };
-let activeButtonTouches = {}; // Track active button touches to prevent double input
-
-const JOYSTICK_DEADZONE = 12;
-const JOYSTICK_MAXDIST = 35;
 
 // Load saved mobile config
 function loadMobileConfig() {
@@ -103,8 +99,10 @@ function applyMobileConfig() {
 function initMobileSettingsPanel() {
     if (!isTouchDevice) return;
 
+    // Load saved config first
     loadMobileConfig();
 
+    // Set slider values
     document.getElementById('mobileJoystickSize').value = mobileConfig.joystickSize;
     document.getElementById('mobileJoystickSizeVal').textContent = mobileConfig.joystickSize;
     document.getElementById('mobileButtonSize').value = mobileConfig.buttonSize;
@@ -181,7 +179,7 @@ function updateMobileControlsVisibility() {
     if (!isTouchDevice) return;
 
     const mobileControls = document.getElementById('mobileControls');
-    const isPlaying = (state === 'playing' || state === 'announce');
+    const isPlaying = (typeof state !== 'undefined' && (state === 'playing' || state === 'announce'));
     const isPortrait = window.innerHeight > window.innerWidth;
 
     // Show controls only during gameplay
@@ -293,7 +291,7 @@ function initMobileControls() {
     // Action button touch handlers - improved to prevent double input
     actionButtons.forEach(btn => {
         const action = btn.dataset.action;
-        if (!action || !P1KEYS[action]) return;
+        if (!action || typeof P1KEYS === 'undefined' || !P1KEYS[action]) return;
 
         const keyCode = P1KEYS[action];
         const touchKey = 'btn_' + action;
@@ -303,7 +301,7 @@ function initMobileControls() {
             // Prevent double registration
             if (activeButtonTouches[touchKey]) return;
             activeButtonTouches[touchKey] = true;
-            justPressed[keyCode] = true;
+            if (typeof justPressed !== 'undefined') justPressed[keyCode] = true;
             keys[keyCode] = true;
             btn.classList.add('pressed');
         }, { passive: false });
@@ -313,7 +311,7 @@ function initMobileControls() {
             delete activeButtonTouches[touchKey];
             keys[keyCode] = false;
             btn.classList.remove('pressed');
-        }, { passive: false });
+        }, { passive: false })
 
         btn.addEventListener('touchcancel', (e) => {
             delete activeButtonTouches[touchKey];
